@@ -14,9 +14,11 @@ import {
   Send,
   MapPinOff,
   Ticket,
+  Info,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import { getRestaurantById, formatGs } from '../data/restaurants.js'
+import { openDirections } from '../lib/maps.js'
 import { EVENTS } from '../data/events.js'
 import { SERVICES } from '../data/categories.js'
 import { CATEGORY_ICON, SERVICE_ICON } from '../lib/icons.js'
@@ -27,7 +29,6 @@ export default function RestaurantDetail() {
   const navigate = useNavigate()
   const { isFavorite, toggleFavorite, user, reviews, addReview } = useApp()
   const r = getRestaurantById(id)
-  const [showRoute, setShowRoute] = useState(false)
   const [toast, setToast] = useState('')
 
   // composer de reseña
@@ -117,7 +118,9 @@ export default function RestaurantDetail() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Rating value={r.rating} />
-                <span className="muted" style={{ fontSize: 13 }}>({totalReviews} reseñas)</span>
+                <span className="muted" style={{ fontSize: 13 }}>
+                  {totalReviews > 0 ? `· ${totalReviews} reseña${totalReviews === 1 ? '' : 's'} en PlanGo` : '· en Google'}
+                </span>
               </div>
               <p className="muted inline-ic" style={{ fontSize: 13.5, marginTop: 4 }}>
                 <MapPin size={14} strokeWidth={2.3} /> {r.city} · {r.distanceKm} km
@@ -245,6 +248,11 @@ export default function RestaurantDetail() {
           )}
 
           <div className="stack" style={{ marginTop: 12 }}>
+            {allReviews.length === 0 && (
+              <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+                Todavía no hay reseñas en PlanGo. ¡Sé la primera persona en opinar! 👆
+              </p>
+            )}
             {allReviews.map((rv) => (
               <div key={rv._key} className={'review' + (rv.mine ? ' mine' : '')}>
                 <div className="head">
@@ -268,12 +276,10 @@ export default function RestaurantDetail() {
             ))}
           </div>
 
-          {showRoute && (
-            <div className="promo-banner" style={{ marginTop: 18, background: 'var(--green-50)', color: 'var(--green)' }}>
-              <Navigation size={18} strokeWidth={2.3} />
-              Ruta trazada desde tu ubicación · {r.distanceKm} km · ~{Math.round(r.distanceKm * 3 + 4)} min en auto
-            </div>
-          )}
+          <div className="data-note">
+            <Info size={13} strokeWidth={2.4} />
+            Datos de fuentes públicas. Menú, precios y calificación son indicativos y pueden variar.
+          </div>
         </div>
       </div>
 
@@ -282,7 +288,7 @@ export default function RestaurantDetail() {
         <button className="btn btn-ghost" style={{ width: 52, flex: 'none', padding: 0 }} onClick={onFav} aria-label="Favorito">
           <Heart size={20} strokeWidth={2.3} fill={fav ? '#ef4444' : 'none'} color={fav ? '#ef4444' : '#1f2937'} />
         </button>
-        <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowRoute(true)}>
+        <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => openDirections(r)}>
           <Navigation size={18} strokeWidth={2.3} /> Cómo llegar
         </button>
         <button className="btn btn-primary" style={{ flex: 1.2 }} onClick={() => navigate(`/reserve/${r.id}`)}>

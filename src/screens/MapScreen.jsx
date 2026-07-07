@@ -1,62 +1,107 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, X, Navigation, MapPin, Hand } from 'lucide-react'
+import L from 'leaflet'
+import { Search, X, Navigation, MapPin, LocateFixed } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import { RESTAURANTS, priceRangeLabel, formatGs } from '../data/restaurants.js'
 import { applyFilters } from '../data/filter.js'
 import { Rating } from '../components/RestaurantCard.jsx'
 import { CATEGORY_ICON } from '../lib/icons.js'
+import { openDirections } from '../lib/maps.js'
 
-// Fondo de mapa estilizado (calles + río Paraguay), 100% offline.
-function MapBackground() {
-  return (
-    <svg
-      className="map-canvas"
-      viewBox="0 0 400 700"
-      preserveAspectRatio="xMidYMid slice"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect width="400" height="700" fill="#e6efe1" />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = (i % 5) * 80 + 8
-        const y = Math.floor(i / 5) * 90 + 10
-        return <rect key={i} x={x} y={y} width="64" height="72" rx="8" fill="#eef4e9" />
-      })}
-      <path
-        d="M-20 120 C 120 180, 60 320, 200 400 S 380 560, 440 640 L 500 720 L -40 720 Z"
-        fill="#cfe3f0"
-        opacity="0.9"
-      />
-      <g stroke="#dfe8d8" strokeWidth="10" strokeLinecap="round">
-        <line x1="0" y1="230" x2="400" y2="200" />
-        <line x1="0" y1="470" x2="400" y2="500" />
-        <line x1="150" y1="0" x2="120" y2="700" />
-        <line x1="300" y1="0" x2="330" y2="700" />
-      </g>
-      <g stroke="#fff" strokeWidth="3" strokeDasharray="10 12" opacity="0.7">
-        <line x1="0" y1="230" x2="400" y2="200" />
-        <line x1="150" y1="0" x2="120" y2="700" />
-      </g>
-    </svg>
-  )
-}
+// Centro aproximado de Gran Asunción
+const CENTER = [-25.3, -57.58]
 
 export default function MapScreen() {
   const navigate = useNavigate()
   const { filters } = useApp()
   const results = applyFilters(RESTAURANTS, filters)
   const [selectedId, setSelectedId] = useState(null)
-  const [routeTo, setRouteTo] = useState(null)
+
+  const containerRef = useRef(null)
+  const mapRef = useRef(null)
+  const layerRef = useRef(null)
+  const meRef = useRef(null)
+
   const selected = results.find((r) => r.id === selectedId)
   const SelIcon = selected ? CATEGORY_ICON[selected.category] : null
+
+  // Inicializar el mapa una sola vez
+  useEffect(() => {
+    if (mapRef.current || !containerRef.current) return
+    const map = L.map(containerRef.current, { zoomControl: false }).setView(CENTER, 12)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(map)
+    L.control.zoom({ position: 'bottomright' }).addTo(map)
+    layerRef.current = L.layerGroup().addTo(map)
+    mapRef.current = map
+    // Cerrar la hoja al tocar el mapa vacío
+    map.on('click', () => setSelectedId(null))
+    setTimeout(() => map.invalidateSize(), 120)
+    return () => {
+      map.remove()
+      mapRef.current = null
+    }
+  }, [])
+
+  // (Re)dibujar los pines cuando cambian los resultados
+  useEffect(() => {
+    const map = mapRef.current
+    const layer = layerRef.current
+    if (!map || !layer) return
+    layer.clearLayers()
+    const pts = []
+    results.forEach((r) => {
+      const price = formatGs(r.priceFrom).replace('Gs. ', '₲ ')
+      const icon = L.divIcon({
+        className: 'lpin-wrap',
+        html: `<div class="lpin" style="--pc:${r.gradient[0]}"><span class="lpin-em">${r.emoji}</span><span class="lpin-price">${price}</span></div>`,
+        iconSize: [78, 30],
+        iconAnchor: [39, 34],
+      })
+      const m = L.marker([r.lat, r.lng], { icon, title: r.name }).addTo(layer)
+      m.on('click', () => {
+        setSelectedId(r.id)
+        map.panTo([r.lat, r.lng])
+      })
+      pts.push([r.lat, r.lng])
+    })
+    if (pts.length) {
+      try {
+        map.fitBounds(pts, { padding: [60, 60], maxZoom: 14 })
+      } catch {
+        map.setView(CENTER, 12)
+      }
+    }
+  }, [results])
+
+  const locateMe = () => {
+    const map = mapRef.current
+    if (!map) return
+    map.locate({ setView: true, maxZoom: 15 })
+    map.once('locationfound', (e) => {
+      if (meRef.current) map.removeLayer(meRef.current)
+      meRef.current = L.circleMarker(e.latlng, {
+        radius: 9,
+        color: '#fff',
+        weight: 3,
+        fillColor: '#2563eb',
+        fillOpacity: 1,
+      }).addTo(map)
+    })
+    map.once('locationerror', () => {
+      alert('No pudimos acceder a tu ubicación. Activá el permiso de ubicación del navegador.')
+    })
+  }
 
   return (
     <div className="screen">
       <div className="map-wrap">
-        <MapBackground />
+        <div ref={containerRef} className="leaflet-map" />
 
-        <div className="map-you" style={{ left: '42%', top: '48%' }} title="Tu ubicación" />
-
+        {/* Buscador flotante */}
         <div className="map-top pad">
           <div className="search" style={{ boxShadow: 'var(--shadow)' }} onClick={() => navigate('/filters')}>
             <Search size={19} strokeWidth={2.3} color="var(--muted-2)" />
@@ -67,31 +112,13 @@ export default function MapScreen() {
           </div>
         </div>
 
-        {/* Pines */}
-        {results.map((r) => {
-          const PinIcon = CATEGORY_ICON[r.category]
-          return (
-            <button
-              key={r.id}
-              className={'map-pin' + (selectedId === r.id ? ' selected' : '')}
-              style={{ left: `${r.map.x}%`, top: `${r.map.y}%` }}
-              aria-label={`${r.name} · ${r.city} · desde ${formatGs(r.priceFrom)}`}
-              onClick={() => {
-                setSelectedId(r.id)
-                setRouteTo(null)
-              }}
-            >
-              <span className="bubble">
-                <span className="em"><PinIcon size={13} strokeWidth={2.3} aria-hidden="true" /></span>
-                {formatGs(r.priceFrom)}
-              </span>
-              <span className="stem" />
-            </button>
-          )
-        })}
+        {/* Botón mi ubicación */}
+        <button className="map-locate" onClick={locateMe} aria-label="Mi ubicación">
+          <LocateFixed size={20} strokeWidth={2.2} />
+        </button>
 
-        {/* Hoja inferior con el lugar seleccionado */}
-        {selected && (
+        {/* Hoja del lugar seleccionado */}
+        {selected ? (
           <div className="map-sheet">
             <div className="rcard" style={{ padding: 12 }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -110,7 +137,7 @@ export default function MapScreen() {
                     <Rating value={selected.rating} />
                   </div>
                   <p className="muted inline-ic" style={{ fontSize: 12.5, marginTop: 2 }}>
-                    <MapPin size={13} strokeWidth={2.3} /> {selected.city} · {selected.distanceKm} km · {priceRangeLabel(selected)}
+                    <MapPin size={13} strokeWidth={2.3} /> {selected.city} · {priceRangeLabel(selected)}
                   </p>
                 </div>
                 <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={() => setSelectedId(null)} aria-label="Cerrar">
@@ -118,15 +145,8 @@ export default function MapScreen() {
                 </button>
               </div>
 
-              {routeTo === selected.id && (
-                <div className="promo-banner" style={{ marginTop: 12, background: 'var(--green-50)', color: 'var(--green)' }}>
-                  <Navigation size={17} strokeWidth={2.3} />
-                  Ruta trazada · {selected.distanceKm} km · ~{Math.round(selected.distanceKm * 3 + 4)} min en auto
-                </div>
-              )}
-
               <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                <button className="btn btn-green btn-sm" style={{ flex: 1 }} onClick={() => setRouteTo(selected.id)}>
+                <button className="btn btn-green btn-sm" style={{ flex: 1 }} onClick={() => openDirections(selected)}>
                   <Navigation size={16} strokeWidth={2.3} /> Cómo llegar
                 </button>
                 <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={() => navigate(`/restaurant/${selected.id}`)}>
@@ -135,12 +155,10 @@ export default function MapScreen() {
               </div>
             </div>
           </div>
-        )}
-
-        {!selected && (
+        ) : (
           <div className="map-sheet">
-            <div className="promo-banner" style={{ justifyContent: 'center', background: 'rgba(255,255,255,.94)', color: 'var(--ink-soft)' }}>
-              <Hand size={18} strokeWidth={2.2} /> Tocá un pin para ver el lugar y cómo llegar
+            <div className="promo-banner" style={{ justifyContent: 'center', background: 'rgba(255,255,255,.95)', color: 'var(--ink-soft)' }}>
+              <MapPin size={17} strokeWidth={2.3} /> Tocá un pin para ver el lugar y cómo llegar
             </div>
           </div>
         )}

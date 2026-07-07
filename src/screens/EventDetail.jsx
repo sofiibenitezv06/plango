@@ -12,11 +12,13 @@ import {
   Check,
   ChevronRight,
   Zap,
+  Navigation,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
-import { getEventById, eventPriceLabel, EVENT_CATEGORIES } from '../data/events.js'
+import { getEventById, eventPriceLabel, EVENT_CATEGORIES, eventAddress } from '../data/events.js'
 import { getRestaurantById, formatGs } from '../data/restaurants.js'
 import { EVENT_ICON, CATEGORY_ICON } from '../lib/icons.js'
+import { openDirections } from '../lib/maps.js'
 
 const typeLabel = (id) => EVENT_CATEGORIES.find((c) => c.id === id)?.label ?? ''
 
@@ -161,7 +163,7 @@ export default function EventDetail() {
             </div>
             <div className="info-tile" style={{ gridColumn: '1 / -1' }}>
               <div className="k">Dirección</div>
-              <div className="v inline-ic" style={{ fontSize: 13.5 }}><MapPin size={14} strokeWidth={2.3} /> {e.address}</div>
+              <div className="v inline-ic" style={{ fontSize: 13.5 }}><MapPin size={14} strokeWidth={2.3} /> {eventAddress(e)}</div>
             </div>
           </div>
 
@@ -213,7 +215,14 @@ export default function EventDetail() {
       </div>
 
       <div className="detail-cta">
-        <button className="btn btn-primary" onClick={confirm}>
+        <button
+          className="btn btn-ghost"
+          style={{ flex: 1 }}
+          onClick={() => openDirections(venue || { name: e.venue, address: eventAddress(e), city: e.city })}
+        >
+          <Navigation size={18} strokeWidth={2.3} /> Cómo llegar
+        </button>
+        <button className="btn btn-primary" style={{ flex: 1.3 }} onClick={confirm}>
           <Ticket size={18} strokeWidth={2.3} /> {free ? 'Anotarme' : `Reservar ${people > 1 ? people + ' entradas' : 'entrada'}`}
         </button>
       </div>

@@ -1854,3 +1854,85 @@ h2.inline-ic {
   opacity: 0.92;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
 }
+
+/* ============================================================
+   Mapa real (Leaflet)
+   ============================================================ */
+.leaflet-map {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.leaflet-container {
+  font: inherit;
+  background: #e6efe1;
+}
+/* Pin personalizado (pastilla con emoji + precio) */
+.lpin {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fff;
+  color: var(--ink);
+  border: 2px solid var(--pc);
+  border-radius: 999px;
+  padding: 3px 10px 3px 6px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+.lpin-em {
+  font-size: 13px;
+  line-height: 1;
+}
+.lpin-price {
+  color: var(--pc);
+}
+/* Overlays por encima del mapa */
+.map-top {
+  z-index: 1000;
+}
+.map-sheet {
+  z-index: 1001;
+}
+.map-locate {
+  position: absolute;
+  top: calc(var(--safe-top) + 74px);
+  right: 12px;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease;
+}
+.map-locate:active {
+  transform: scale(0.9);
+}
+/* Controles de zoom de Leaflet con estilo de la app */
+.leaflet-bar a {
+  color: var(--ink);
+}
+
+/* Aviso de fuente de datos (ficha) */
+.data-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 20px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.data-note svg {
+  flex: none;
+  margin-top: 1px;
+}

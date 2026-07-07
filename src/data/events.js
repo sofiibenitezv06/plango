@@ -1,4 +1,4 @@
-import { formatGs } from './restaurants.js'
+import { formatGs, getRestaurantById } from './restaurants.js'
 
 // Tipos de evento (para los filtros).
 export const EVENT_CATEGORIES = [
@@ -10,18 +10,18 @@ export const EVENT_CATEGORIES = [
   { id: 'show', label: 'Shows' },
 ]
 
-// Eventos de entretenimiento (ficticios) en Gran Asunción.
-// restaurantId enlaza el evento a un local de RESTAURANTS (opcional).
+// Eventos de entretenimiento (demostración) en Gran Asunción.
+// Cuando tienen restaurantId, se realizan en un local REAL de la app.
 export const EVENTS = [
   {
     id: 'jazz-loma',
     title: 'Noche de Jazz en Vivo',
     category: 'musica',
     emoji: '🎷',
-    venue: 'Café de la Loma',
-    restaurantId: 'cafe-de-la-loma',
+    venue: 'El Café de Acá',
+    restaurantId: 'el-cafe-de-aca',
     city: 'Asunción',
-    address: 'Palma esq. 14 de Mayo, Centro, Asunción',
+    address: 'Tte. Vera 1390, Villa Morra, Asunción',
     weekday: 'Vie',
     day: '11',
     month: 'jul',
@@ -60,14 +60,14 @@ export const EVENTS = [
     ],
   },
   {
-    id: 'retro-nativo',
+    id: 'retro-negroni',
     title: 'Fiesta Retro 90s & 2000s',
     category: 'fiesta',
     emoji: '🕺',
-    venue: 'Bar Nativo',
-    restaurantId: 'bar-nativo',
-    city: 'Mariano Roque Alonso',
-    address: 'Av. Sacramento, Mariano Roque Alonso',
+    venue: 'Negroni Downtown Skybar',
+    restaurantId: 'negroni-downtown-skybar',
+    city: 'Asunción',
+    address: '',
     weekday: 'Sáb',
     day: '12',
     month: 'jul',
@@ -75,7 +75,7 @@ export const EVENTS = [
     priceFrom: 50000,
     gradient: ['#a21caf', '#701a75'],
     tagline: 'La mejor música de los 90 y 2000 con DJ en vivo toda la noche',
-    tags: ['Nocturno', 'DJ', 'Baile'],
+    tags: ['Nocturno', 'DJ', 'Rooftop'],
     details: [
       'DJ set de clásicos 90s / 2000s',
       'Barra de tragos de autor con happy hour hasta las 00:00',
@@ -83,14 +83,14 @@ export const EVENTS = [
     ],
   },
   {
-    id: 'standup-sunset',
+    id: 'standup-casagin',
     title: 'Stand Up Comedy Night',
     category: 'show',
     emoji: '🎤',
-    venue: 'Sunset Rooftop Bar',
-    restaurantId: 'sunset-rooftop',
+    venue: 'Casa Gin',
+    restaurantId: 'casa-gin',
     city: 'Asunción',
-    address: 'Torre 1, Villa Morra, Asunción',
+    address: '',
     weekday: 'Jue',
     day: '17',
     month: 'jul',
@@ -98,7 +98,7 @@ export const EVENTS = [
     priceFrom: 45000,
     gradient: ['#ef4444', '#991b1b'],
     tagline: 'Cuatro comediantes paraguayos en una noche a puro reír',
-    tags: ['Show', 'Comedia', 'Rooftop'],
+    tags: ['Show', 'Comedia', 'Tragos'],
     details: [
       'Line-up de 4 comediantes locales',
       'Show de ~90 minutos con intervalo',
@@ -106,14 +106,14 @@ export const EVENTS = [
     ],
   },
   {
-    id: 'cata-napoli',
+    id: 'cata-grosso',
     title: 'Cata de Vinos y Quesos',
     category: 'gastronomia',
     emoji: '🍷',
-    venue: 'Napoli Trattoria',
-    restaurantId: 'napoli-trattoria',
+    venue: 'Grosso Cocina Italiana',
+    restaurantId: 'grosso-cocina-italiana',
     city: 'Asunción',
-    address: 'Av. Aviadores del Chaco, Asunción',
+    address: '',
     weekday: 'Mié',
     day: '16',
     month: 'jul',
@@ -152,14 +152,14 @@ export const EVENTS = [
     ],
   },
   {
-    id: 'folclore-fogon',
+    id: 'folclore-paraguayita',
     title: 'Noche de Folclore y Asado',
     category: 'musica',
     emoji: '🪕',
-    venue: 'El Fogón',
-    restaurantId: 'el-fogon',
-    city: 'Luque',
-    address: 'Av. Aviadores del Chaco km 6, Luque',
+    venue: 'La Paraguayita',
+    restaurantId: 'la-paraguayita',
+    city: 'Asunción',
+    address: 'Av. Brasilia esq. República de Siria, Asunción',
     weekday: 'Sáb',
     day: '19',
     month: 'jul',
@@ -175,14 +175,14 @@ export const EVENTS = [
     ],
   },
   {
-    id: 'djset-sunset',
+    id: 'djset-negroni',
     title: 'DJ Set Sunset',
     category: 'fiesta',
     emoji: '🎧',
-    venue: 'Sunset Rooftop Bar',
-    restaurantId: 'sunset-rooftop',
+    venue: 'Negroni Downtown Skybar',
+    restaurantId: 'negroni-downtown-skybar',
     city: 'Asunción',
-    address: 'Torre 1, Villa Morra, Asunción',
+    address: '',
     weekday: 'Vie',
     day: '25',
     month: 'jul',
@@ -205,3 +205,12 @@ export const eventsForRestaurant = (restaurantId) =>
   EVENTS.filter((e) => e.restaurantId === restaurantId)
 
 export const eventPriceLabel = (e) => (e.priceFrom === 0 ? 'Gratis' : `Desde ${formatGs(e.priceFrom)}`)
+
+// Dirección a mostrar: la del local real si el evento está enlazado, si no la propia.
+export const eventAddress = (e) => {
+  if (e.restaurantId) {
+    const r = getRestaurantById(e.restaurantId)
+    if (r) return r.address
+  }
+  return e.address
+}
