@@ -12,8 +12,11 @@ import {
   MapPin,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
-import { getRestaurantById } from '../data/restaurants.js'
+import { getRestaurantById, formatGs } from '../data/restaurants.js'
 import { CATEGORY_ICON } from '../lib/icons.js'
+import PaymentPanel from '../components/PaymentPanel.jsx'
+
+const SENA_POR_PERSONA = 20000
 
 const WD = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 const MO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
@@ -46,7 +49,10 @@ export default function Reserve() {
   const [time, setTime] = useState('20:00')
   const [people, setPeople] = useState(2)
   const [note, setNote] = useState('')
+  const [paying, setPaying] = useState(false)
   const [confirmed, setConfirmed] = useState(null)
+
+  const amount = SENA_POR_PERSONA * people
 
   if (!r) {
     return (
@@ -63,7 +69,7 @@ export default function Reserve() {
 
   const CatIcon = CATEGORY_ICON[r.category]
 
-  const confirm = () => {
+  const pay = (payMethod, paid) => {
     const code = 'PG-' + Math.floor(1000 + Math.random() * 9000)
     const res = {
       id: `${r.id}-${code}`,
@@ -74,6 +80,9 @@ export default function Reserve() {
       people,
       code,
       note: note.trim(),
+      payMethod,
+      paid,
+      amount,
     }
     addReservation(res)
     setConfirmed(res)
@@ -123,6 +132,10 @@ export default function Reserve() {
                   <span className="v" style={{ color: 'var(--orange-600)' }}>{confirmed.code}</span>
                 </div>
               </div>
+              <div className="ticket-pay">
+                <span>{confirmed.paid ? '✓ Seña pagada' : 'Seña · pagás en el local'}</span>
+                <span>{confirmed.payMethod} · {formatGs(confirmed.amount)}</span>
+              </div>
             </div>
 
             <div style={{ width: '100%', marginTop: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -135,6 +148,20 @@ export default function Reserve() {
             </div>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (paying) {
+    return (
+      <div className="screen">
+        <div className="topbar">
+          <button className="icon-btn" onClick={() => setPaying(false)} aria-label="Volver">
+            <ChevronLeft size={22} strokeWidth={2.4} />
+          </button>
+          <h1>Pago de la seña</h1>
+        </div>
+        <PaymentPanel amount={amount} note="Seña (se descuenta de tu consumo)" onConfirm={pay} />
       </div>
     )
   }
@@ -232,8 +259,8 @@ export default function Reserve() {
       </div>
 
       <div className="detail-cta" style={{ position: 'absolute' }}>
-        <button className="btn btn-primary" onClick={confirm}>
-          Confirmar reserva · {date.label} {time}
+        <button className="btn btn-primary" onClick={() => setPaying(true)}>
+          Continuar al pago · seña {formatGs(amount)}
         </button>
       </div>
     </div>

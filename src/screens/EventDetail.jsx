@@ -19,6 +19,7 @@ import { getEventById, eventPriceLabel, EVENT_CATEGORIES, eventAddress } from '.
 import { getRestaurantById, formatGs } from '../data/restaurants.js'
 import { EVENT_ICON, CATEGORY_ICON } from '../lib/icons.js'
 import { openDirections } from '../lib/maps.js'
+import PaymentPanel from '../components/PaymentPanel.jsx'
 
 const typeLabel = (id) => EVENT_CATEGORIES.find((c) => c.id === id)?.label ?? ''
 
@@ -28,6 +29,7 @@ export default function EventDetail() {
   const { addReservation } = useApp()
   const e = getEventById(id)
   const [people, setPeople] = useState(2)
+  const [paying, setPaying] = useState(false)
   const [confirmed, setConfirmed] = useState(null)
 
   if (!e) {
@@ -46,11 +48,12 @@ export default function EventDetail() {
 
   const Icon = EVENT_ICON[e.category] ?? EVENT_ICON.todos
   const free = e.priceFrom === 0
+  const amount = e.priceFrom * people
   const venue = e.restaurantId ? getRestaurantById(e.restaurantId) : null
   const VenueIcon = venue ? CATEGORY_ICON[venue.category] : null
   const dateStr = `${e.weekday} ${e.day} ${e.month}`
 
-  const confirm = () => {
+  const confirm = (payMethod = null, paid = false) => {
     const code = 'PG-' + Math.floor(1000 + Math.random() * 9000)
     const res = {
       id: `${e.id}-${code}`,
@@ -61,6 +64,9 @@ export default function EventDetail() {
       time: e.time,
       people,
       code,
+      payMethod,
+      paid,
+      amount: free ? 0 : amount,
     }
     addReservation(res)
     setConfirmed(res)
@@ -100,6 +106,10 @@ export default function EventDetail() {
                 <div><span className="k">Entradas</span><span className="v">{people}</span></div>
                 <div><span className="k">Código</span><span className="v" style={{ color: 'var(--orange-600)' }}>{confirmed.code}</span></div>
               </div>
+              <div className="ticket-pay">
+                <span>{free ? '✓ Entrada libre' : confirmed.paid ? '✓ Pagado' : 'A pagar en el lugar'}</span>
+                <span>{free ? 'Anotado' : `${confirmed.payMethod} · ${formatGs(confirmed.amount)}`}</span>
+              </div>
             </div>
 
             <div style={{ width: '100%', marginTop: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -108,6 +118,24 @@ export default function EventDetail() {
             </div>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (paying) {
+    return (
+      <div className="screen">
+        <div className="topbar">
+          <button className="icon-btn" onClick={() => setPaying(false)} aria-label="Volver">
+            <ChevronLeft size={22} strokeWidth={2.4} />
+          </button>
+          <h1>Pago de entradas</h1>
+        </div>
+        <PaymentPanel
+          amount={amount}
+          note={`${people} ${people === 1 ? 'entrada' : 'entradas'} · ${e.title}`}
+          onConfirm={confirm}
+        />
       </div>
     )
   }
@@ -222,7 +250,7 @@ export default function EventDetail() {
         >
           <Navigation size={18} strokeWidth={2.3} /> Cómo llegar
         </button>
-        <button className="btn btn-primary" style={{ flex: 1.3 }} onClick={confirm}>
+        <button className="btn btn-primary" style={{ flex: 1.3 }} onClick={() => (free ? confirm() : setPaying(true))}>
           <Ticket size={18} strokeWidth={2.3} /> {free ? 'Anotarme' : `Reservar ${people > 1 ? people + ' entradas' : 'entrada'}`}
         </button>
       </div>
