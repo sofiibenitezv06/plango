@@ -1,0 +1,23 @@
+{
+  "name": "plango",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "PlanGo — Recomendaciones gastronómicas y de entretenimiento en Gran Asunción (prototipo)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^1.23.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.2",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

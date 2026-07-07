@@ -1,0 +1,1856 @@
+/* ============================================================
+   PlanGo — Sistema visual
+   Marca: naranja #F97316 · verde #15803D · amarillo #FACC15
+          tinta #1F2937 · fondo #FFF7ED
+   ============================================================ */
+
+:root {
+  --orange: #f97316;
+  --orange-600: #ea580c;
+  --orange-50: #fff2e6;
+  --green: #15803d;
+  --green-600: #166534;
+  --green-50: #e7f4ec;
+  --yellow: #facc15;
+  --yellow-600: #eab308;
+  --ink: #1f2937;
+  --ink-soft: #374151;
+  --muted: #6b7280;
+  --muted-2: #9ca3af;
+  --bg: #fff7ed;
+  --surface: #ffffff;
+  --surface-2: #fffaf3;
+  --line: #f1e6d6;
+  --line-2: #ece0cf;
+  --danger: #dc2626;
+
+  --radius-lg: 22px;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow-sm: 0 1px 2px rgba(31, 41, 55, 0.06);
+  --shadow: 0 6px 18px rgba(31, 41, 55, 0.08);
+  --shadow-lg: 0 16px 40px rgba(234, 88, 12, 0.16);
+
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+
+  /* Espacio para la barra de estado del sistema (notch/isla) en móvil real;
+     0 en escritorio. La app ocupa toda la pantalla, sin marco de celular. */
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ============================================================
+   Marco de dispositivo (celular en escritorio / full en móvil)
+   ============================================================ */
+
+.stage {
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg);
+}
+
+/* La app ocupa TODA la pantalla, sin marco de celular */
+.device {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* ============================================================
+   Estructura de pantalla: header fijo + scroll + safe areas
+   ============================================================ */
+
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.screen-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(var(--safe-top) + 14px);
+}
+
+.screen-scroll.with-tabs {
+  padding-bottom: 90px;
+}
+
+.pad {
+  padding: 0 18px;
+}
+
+/* Barra superior con back */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 12px;
+  background: linear-gradient(var(--bg) 72%, rgba(255, 247, 237, 0));
+}
+
+/* Cuando la barra superior es el primer elemento de la pantalla (no hay
+   scroll con padding), dejar espacio para el safe-area superior. */
+.screen > .topbar {
+  padding-top: calc(var(--safe-top) + 12px);
+}
+.topbar h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: var(--ink);
+  flex: none;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+/* ============================================================
+   Botones
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 22px;
+  border-radius: 15px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease;
+  width: 100%;
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn-primary {
+  background: linear-gradient(180deg, #fb8b3d, var(--orange));
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(249, 115, 22, 0.34);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+}
+.btn-green {
+  background: linear-gradient(180deg, #1c9c4b, var(--green));
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(21, 128, 61, 0.28);
+}
+.btn-ghost {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--orange-600);
+  box-shadow: inset 0 0 0 1.5px var(--orange);
+}
+.btn-sm {
+  height: 40px;
+  font-size: 14px;
+  border-radius: 12px;
+  padding: 0 16px;
+  width: auto;
+}
+
+/* ============================================================
+   Chips / pills
+   ============================================================ */
+
+.chip-row {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding: 4px 18px 10px;
+  scrollbar-width: none;
+}
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 15px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transition: transform 0.12s ease;
+}
+.chip:active {
+  transform: scale(0.95);
+}
+.chip.active {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(31, 41, 55, 0.22);
+}
+.chip.active.orange {
+  background: var(--orange);
+  box-shadow: 0 6px 14px rgba(249, 115, 22, 0.3);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--orange-50);
+  color: var(--orange-600);
+  font-size: 12px;
+  font-weight: 700;
+}
+.tag.green {
+  background: var(--green-50);
+  color: var(--green);
+}
+.tag.gray {
+  background: #f2f2f2;
+  color: var(--muted);
+}
+
+/* ============================================================
+   Cards de restaurante
+   ============================================================ */
+
+.rcard {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+.rcard:active {
+  transform: scale(0.985);
+}
+
+.rcard-media {
+  position: relative;
+  height: 128px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 12px;
+  color: #fff;
+}
+.rcard-media .fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.12s ease;
+}
+.rcard-media .fav:active {
+  transform: scale(0.85);
+}
+.rcard-media .promo-flag {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  background: var(--yellow);
+  color: #7a5b00;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 10px 5px 12px;
+  border-radius: 0 999px 999px 0;
+  box-shadow: var(--shadow-sm);
+  max-width: 78%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rcard-body {
+  padding: 12px 14px 14px;
+}
+.rcard-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rcard-title h3 {
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
+  flex: none;
+}
+.rating .star {
+  color: var(--yellow-600);
+}
+.rcard-sub {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.dot-sep::before {
+  content: '·';
+  margin: 0 6px;
+  color: var(--muted-2);
+}
+.rcard-meta {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.price-level {
+  font-weight: 800;
+  color: var(--green);
+  font-size: 13px;
+}
+.price-level .off {
+  color: var(--line-2);
+}
+
+/* Card horizontal (favoritos, resultados compactos) */
+.rrow {
+  display: flex;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 10px;
+  align-items: center;
+}
+.rrow .thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  color: #fff;
+  flex: none;
+}
+.rrow .info {
+  flex: 1;
+  min-width: 0;
+}
+.rrow .info h4 {
+  font-size: 15px;
+  font-weight: 800;
+}
+.rrow .info p {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Bottom navigation
+   ============================================================ */
+
+.bottom-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 78px;
+  padding-bottom: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted-2);
+  width: 64px;
+  transition: color 0.14s ease;
+}
+.nav-item .ic {
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: transform 0.14s ease;
+}
+.nav-item.active {
+  color: var(--orange-600);
+}
+.nav-item.active .ic {
+  transform: translateY(-1px) scale(1.06);
+}
+
+/* ============================================================
+   Formularios
+   ============================================================ */
+
+.field {
+  margin-bottom: 14px;
+}
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-bottom: 7px;
+}
+.input {
+  width: 100%;
+  height: 50px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+  padding: 0 14px;
+  font-size: 15px;
+  color: var(--ink);
+  transition: box-shadow 0.15s ease;
+}
+.input::placeholder {
+  color: var(--muted-2);
+}
+.input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--orange);
+}
+textarea.input {
+  height: auto;
+  min-height: 96px;
+  padding: 12px 14px;
+  resize: none;
+  line-height: 1.5;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  background: var(--surface);
+  border-radius: 15px;
+  box-shadow: var(--shadow-sm);
+  padding: 0 14px;
+}
+.search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 15px;
+  color: var(--ink);
+}
+.search input::placeholder {
+  color: var(--muted-2);
+}
+
+/* Tarjetas de selección (preferencias / filtros) */
+.select-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.select-card {
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  text-align: left;
+}
+.select-card .em {
+  font-size: 22px;
+}
+.select-card:active {
+  transform: scale(0.97);
+}
+.select-card.active {
+  background: var(--orange-50);
+  box-shadow: inset 0 0 0 2px var(--orange);
+  color: var(--orange-600);
+}
+.select-card.active.green {
+  background: var(--green-50);
+  box-shadow: inset 0 0 0 2px var(--green);
+  color: var(--green);
+}
+
+/* ============================================================
+   Utilidades tipográficas / layout
+   ============================================================ */
+
+.h-hello {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.h-title {
+  font-size: 23px;
+  font-weight: 850;
+  letter-spacing: -0.4px;
+  line-height: 1.15;
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 20px 18px 12px;
+}
+.section-head h2 {
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: -0.3px;
+}
+.section-head a,
+.link-action {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange-600);
+}
+/* Botón con apariencia de enlace (accionable por teclado, con foco y cursor) */
+.link-action {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.muted {
+  color: var(--muted);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 16px 0;
+}
+.empty {
+  padding: 60px 30px;
+  text-align: center;
+  color: var(--muted);
+}
+.empty .big {
+  font-size: 52px;
+  margin-bottom: 10px;
+}
+
+/* ============================================================
+   Splash / bienvenida
+   ============================================================ */
+
+.splash {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  background:
+    radial-gradient(120% 80% at 80% 0%, #fb923c 0%, transparent 55%),
+    linear-gradient(160deg, #f97316 0%, #ea580c 58%, #c2410c 100%);
+  padding: calc(var(--safe-top) + 44px) 26px 30px;
+  position: relative;
+  overflow: hidden;
+}
+.splash .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0.25;
+}
+.splash-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  z-index: 2;
+}
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.brand-lockup .pin {
+  width: 58px;
+  height: 58px;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+}
+.brand-name {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+.brand-name .go {
+  color: #ffe9b8;
+}
+.splash-tag {
+  font-size: 16.5px;
+  font-weight: 500;
+  opacity: 0.95;
+  max-width: 280px;
+  line-height: 1.4;
+}
+.splash-illus {
+  display: flex;
+  gap: 10px;
+  margin: 26px 0 8px;
+  font-size: 34px;
+}
+.splash-illus span {
+  background: rgba(255, 255, 255, 0.16);
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(4px);
+}
+.splash-actions {
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.splash-actions .btn-white {
+  background: #fff;
+  color: var(--orange-600);
+}
+.splash-actions .link {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  padding: 8px;
+}
+
+/* ============================================================
+   Detalle de restaurante
+   ============================================================ */
+
+.detail-hero {
+  height: 236px;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px 16px 30px;
+  color: #fff;
+  position: relative;
+}
+.detail-hero .hero-emoji {
+  position: absolute;
+  right: 16px;
+  top: calc(var(--safe-top) + 64px);
+  font-size: 96px;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+  opacity: 0.92;
+}
+.detail-hero-bar {
+  position: absolute;
+  top: calc(var(--safe-top) + 12px);
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 5;
+}
+.detail-hero-bar .icon-btn {
+  background: rgba(255, 255, 255, 0.9);
+}
+.detail-hero h1 {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+.detail-sheet {
+  background: var(--bg);
+  border-radius: 22px 22px 0 0;
+  margin-top: -20px;
+  position: relative;
+  z-index: 3;
+  padding: 18px 18px 30px;
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+.info-tile {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.info-tile .k {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.info-tile .v {
+  font-size: 14.5px;
+  font-weight: 700;
+  margin-top: 3px;
+}
+.svc-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.svc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+  font-weight: 600;
+}
+.svc.off {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px dashed var(--line-2);
+}
+.menu-item:last-child {
+  border-bottom: none;
+}
+.menu-item .name {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.menu-item .price {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--green);
+  white-space: nowrap;
+}
+.menu-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--orange-600);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 16px 0 2px;
+}
+.review {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 13px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.review .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.review .who {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fdba74, #f97316);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 800;
+}
+.review p {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.detail-cta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 16px 20px;
+  background: linear-gradient(rgba(255, 247, 237, 0), var(--bg) 34%);
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+.detail-cta .btn {
+  white-space: nowrap;
+  padding: 0 12px;
+  font-size: 15px;
+}
+
+/* Promo banner */
+.promo-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(100deg, #fff7d6, #fde68a);
+  color: #7a5b00;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+.promo-banner .em {
+  font-size: 20px;
+}
+
+/* ============================================================
+   Mapa estilizado
+   ============================================================ */
+
+.map-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.map-canvas {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, #dbe7d8 0%, #e8f0e2 100%);
+}
+.map-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 3;
+  transition: transform 0.15s ease;
+}
+.map-pin:active {
+  transform: translate(-50%, -100%) scale(0.9);
+}
+.map-pin .bubble {
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 9px 4px 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.map-pin.selected .bubble {
+  background: var(--orange);
+  color: #fff;
+}
+.map-pin .bubble .em {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--orange-50);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+.map-pin.selected .bubble .em {
+  background: rgba(255, 255, 255, 0.28);
+}
+.map-pin .stem {
+  width: 2px;
+  height: 10px;
+  background: rgba(31, 41, 55, 0.35);
+}
+.map-you {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #2563eb;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2), var(--shadow);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+.map-sheet {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 90px; /* por encima de la barra de navegación (78px) */
+  z-index: 10;
+  animation: sheetUp 0.24s ease;
+}
+@keyframes sheetUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Chips flotantes sobre el mapa */
+.map-top {
+  position: absolute;
+  top: calc(var(--safe-top) + 14px);
+  left: 0;
+  right: 0;
+  z-index: 12;
+}
+
+/* ============================================================
+   Feedback / rating stars input
+   ============================================================ */
+
+.stars-input {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  font-size: 40px;
+  margin: 8px 0 4px;
+}
+.stars-input {
+  align-items: center;
+}
+.stars-input .s {
+  transition: transform 0.12s ease;
+  display: grid;
+  place-items: center;
+}
+.stars-input .s.on {
+  transform: scale(1.12);
+}
+
+.pill-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ============================================================
+   Perfil
+   ============================================================ */
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 4px 4px;
+}
+.profile-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e, var(--green));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  font-weight: 800;
+  flex: none;
+}
+.list-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 15px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.list-row:last-child {
+  border-bottom: none;
+}
+.list-row.is-link {
+  cursor: pointer;
+}
+.list-row.is-link:active {
+  background: var(--surface-2);
+}
+.list-row .lic {
+  flex: none;
+  color: var(--muted);
+}
+.list-row .chev {
+  margin-left: auto;
+  color: var(--muted-2);
+}
+
+/* Banner "para comercios" (modelo freemium del plan) */
+.biz-banner {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #1f2937, #111827);
+  color: #fff;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.biz-banner h3 {
+  font-size: 17px;
+  font-weight: 850;
+}
+.biz-banner p {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+  line-height: 1.45;
+}
+.biz-banner .em {
+  position: absolute;
+  right: -6px;
+  bottom: -10px;
+  font-size: 76px;
+  opacity: 0.18;
+}
+
+/* Toast */
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  z-index: 80;
+  animation: toastIn 0.2s ease;
+}
+@keyframes toastIn {
+  from {
+    transform: translate(-50%, 10px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* animación de entrada de listas */
+.fade-up {
+  animation: fadeUp 0.3s ease both;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Iconos Lucide — alineación y utilidades
+   ============================================================ */
+
+.lucide {
+  flex: none;
+}
+
+/* Texto con un icono adelante, alineado verticalmente */
+.inline-ic {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+h1.inline-ic,
+h2.inline-ic {
+  gap: 7px;
+}
+
+/* Icono de categoría como tile en la card */
+.media-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Pill de estado (abierto/cerrado) en la card */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1f2937;
+  font-size: 12px;
+  font-weight: 700;
+}
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+.status-tag.open {
+  background: var(--green-50);
+  color: var(--green);
+}
+.status-tag.closed {
+  background: #fee2e2;
+  color: var(--danger);
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--muted-2);
+}
+.dot.on {
+  background: #22c55e;
+}
+
+/* estrellas estáticas en reseñas */
+.stars-static {
+  display: inline-flex;
+  gap: 1px;
+  flex: none;
+}
+
+/* ============================================================
+   Ventajas ("¿Por qué PlanGo?")
+   ============================================================ */
+
+.adv-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 2px 18px 8px;
+  scrollbar-width: none;
+}
+.adv-row::-webkit-scrollbar {
+  display: none;
+}
+.adv-card {
+  flex: none;
+  width: 210px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
+}
+.adv-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+}
+.adv-card h4 {
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+.adv-card p {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+/* Card de promo en Inicio */
+.promo-card {
+  flex: none;
+  width: 250px;
+  height: 118px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  color: #fff;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ============================================================
+   Campo con icono (registro)
+   ============================================================ */
+
+.input-ic {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+  padding: 0 14px;
+  transition: box-shadow 0.15s ease;
+}
+.input-ic:focus-within {
+  box-shadow: inset 0 0 0 2px var(--orange);
+}
+.input-ic input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 15px;
+  color: var(--ink);
+}
+.input-ic input::placeholder {
+  color: var(--muted-2);
+}
+
+/* Encabezados de sección con icono */
+.pref-h,
+.reserve-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 22px 0 10px;
+}
+.reserve-h {
+  font-size: 15px;
+  margin: 20px 0 10px;
+}
+
+/* ============================================================
+   Reservas
+   ============================================================ */
+
+.reserve-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 9px 13px;
+  border-radius: 12px;
+  background: var(--green-50);
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+}
+.day-row {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.day-row::-webkit-scrollbar {
+  display: none;
+}
+.day-chip {
+  flex: none;
+  width: 62px;
+  padding: 10px 0;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: transform 0.12s ease;
+}
+.day-chip:active {
+  transform: scale(0.95);
+}
+.day-chip.active {
+  background: var(--orange);
+  box-shadow: none;
+  color: #fff;
+}
+.day-chip .d-label {
+  font-size: 13px;
+  font-weight: 800;
+}
+.day-chip .d-sub {
+  font-size: 11.5px;
+  opacity: 0.75;
+}
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+.slot {
+  height: 42px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  transition: transform 0.12s ease;
+}
+.slot:active {
+  transform: scale(0.95);
+}
+.slot.active {
+  background: var(--orange);
+  color: #fff;
+  box-shadow: none;
+}
+.slot.taken {
+  opacity: 0.38;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border-radius: 15px;
+  box-shadow: var(--shadow-sm);
+  padding: 8px 14px;
+}
+.counter-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--orange-50);
+  color: var(--orange-600);
+  display: grid;
+  place-items: center;
+  transition: transform 0.12s ease;
+}
+.counter-btn:active {
+  transform: scale(0.9);
+}
+.counter-btn:disabled {
+  opacity: 0.4;
+}
+.counter-val {
+  font-size: 22px;
+  font-weight: 850;
+}
+
+/* Confirmación de reserva */
+.confirm-check {
+  width: 84px;
+  height: 84px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e, var(--green));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 12px 26px rgba(21, 128, 61, 0.34);
+  animation: pop 0.34s ease;
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.ticket {
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-top: 22px;
+  text-align: left;
+}
+.ticket-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ticket-top .thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex: none;
+}
+.ticket-top h4 {
+  font-size: 15.5px;
+  font-weight: 800;
+}
+.ticket-perf {
+  height: 1px;
+  border-top: 2px dashed var(--line-2);
+  margin: 14px -16px;
+  position: relative;
+}
+.ticket-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ticket-grid .k {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.ticket-grid .v {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+/* Reserva en el perfil */
+.res-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 12px 14px;
+  border-left: 4px solid var(--green);
+}
+.res-left {
+  flex: 1;
+  min-width: 0;
+}
+.res-left h4 {
+  font-size: 15px;
+  font-weight: 800;
+}
+.res-left p {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.res-left h4 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.res-left p .dot-sep {
+  margin-left: 2px;
+}
+.res-code {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--orange-600);
+  background: var(--orange-50);
+  padding: 6px 10px;
+  border-radius: 10px;
+  flex: none;
+}
+
+/* ============================================================
+   Composer de reseñas
+   ============================================================ */
+
+.composer {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
+  margin-bottom: 4px;
+}
+.review.mine {
+  box-shadow: inset 0 0 0 1.5px var(--green);
+  background: var(--green-50);
+}
+.sheet-h {
+  font-size: 16px;
+  font-weight: 850;
+  margin: 22px 0 12px;
+}
+.sheet-h-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 22px 0 12px;
+}
+.sheet-h-row .sheet-h {
+  margin: 0;
+}
+
+/* ============================================================
+   Eventos
+   ============================================================ */
+
+.ecard {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.14s ease;
+}
+.ecard:active {
+  transform: scale(0.985);
+}
+.ecard-media {
+  position: relative;
+  height: 108px;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  color: #fff;
+}
+.ecard-ic {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.92;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
+}
+.date-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 6px 11px;
+  text-align: center;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+.date-badge .d {
+  display: block;
+  font-size: 18px;
+  font-weight: 850;
+  color: var(--ink);
+}
+.date-badge .m {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--orange-600);
+  margin-top: 1px;
+}
+.ecard-body {
+  padding: 12px 14px 14px;
+}
+.ecard-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--orange-600);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.ecard-body h3 {
+  font-size: 16.5px;
+  font-weight: 850;
+  letter-spacing: -0.2px;
+  margin-top: 5px;
+}
+.ecard .tagline {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.ecard-meta {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* Mini card (carrusel de Inicio) */
+.emini {
+  flex: none;
+  width: 232px;
+  height: 130px;
+  border-radius: 18px;
+  padding: 14px;
+  color: #fff;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.emini-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.emini .date-badge {
+  position: static;
+  padding: 4px 9px;
+}
+.emini .date-badge .d {
+  font-size: 15px;
+}
+.emini .date-badge .m {
+  font-size: 10px;
+}
+.emini-title {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.emini-sub {
+  font-size: 12.5px;
+  opacity: 0.95;
+  margin-top: 3px;
+}
+
+/* Detalles del evento */
+.event-details {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.event-details li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+.event-details li svg {
+  color: var(--green);
+  flex: none;
+  margin-top: 2px;
+}
+
+/* Banner "evento próximo aquí" en la ficha del local */
+.event-here {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(100deg, #f1e9ff, #e9d5ff);
+  color: #6b21a8;
+  text-align: left;
+  cursor: pointer;
+}
+.event-here-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fff;
+  color: #7c3aed;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.event-here-txt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.event-here-txt b {
+  font-size: 13.5px;
+}
+
+/* Reserva de evento en el perfil */
+.res-card.event {
+  border-left-color: #7c3aed;
+}
+
+/* Hero de la ficha de evento */
+.event-hero {
+  height: 224px;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px 16px 30px;
+  color: #fff;
+  position: relative;
+}
+.event-hero h1 {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+.event-hero .hero-emoji {
+  position: absolute;
+  right: 16px;
+  top: calc(var(--safe-top) + 60px);
+  opacity: 0.92;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+}
