@@ -51,13 +51,18 @@ La sección "¿Por qué PlanGo?" en Inicio resume estas ventajas.
 
 - **Interactivo de verdad:** navegación, filtros, búsqueda, favoritos, reservas y
   reseñas propias (todo se guarda en el navegador), preferencias, feedback.
-- **Datos de demostración:** 14 establecimientos y 8 eventos **ficticios** en
-  Gran Asunción. No representan comercios reales.
-- **Eventos:** sección de entretenimiento (música, ferias, fiestas, shows) con
-  su propia pestaña, filtros por tipo y reserva de entrada. Algunos eventos están
-  ligados a un local.
-- **Sin backend:** todo corre en el navegador. El "mapa" es una ilustración
-  estilizada (no usa Google Maps) para funcionar offline.
+- **Locales reales:** 20 restaurantes REALES de Gran Asunción (El Café de Acá,
+  Kaffe'i, Bolsi, Tierra Colorada, Paulista Grill, Lo de Osvaldo, Walterio, etc.),
+  con ubicación, rubro y horarios reales tomados de fuentes públicas (prensa,
+  sitios oficiales, Google Maps). **Menús, precios y calificaciones son
+  indicativos/aproximados** y pueden variar (se aclara en cada ficha).
+- **Mapa real:** OpenStreetMap con Leaflet; los pines están en las coordenadas
+  reales de cada local y hay botón de "mi ubicación". Requiere internet.
+- **"Cómo llegar" real:** abre Google Maps con la ruta desde tu ubicación.
+- **Eventos (demo):** sección de entretenimiento (música, ferias, fiestas, shows)
+  con pestaña propia, filtros y reserva de entrada; varios se realizan en locales
+  reales de la app.
+- **Sin backend:** favoritos, reservas y reseñas propias se guardan en el navegador.
 
 ## Iconografía
 
